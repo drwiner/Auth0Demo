@@ -1,9 +1,6 @@
 package org.vaadin.alump.auth0demo;
 
 import com.auth0.AuthenticationController;
-import com.auth0.IdentityVerificationException;
-import com.auth0.Tokens;
-import com.auth0.json.auth.UserInfo;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.H2;
@@ -12,23 +9,33 @@ import com.vaadin.flow.component.progressbar.ProgressBar;
 import com.vaadin.flow.router.AfterNavigationEvent;
 import com.vaadin.flow.router.AfterNavigationObserver;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.router.RouteAlias;
 import com.vaadin.flow.server.VaadinRequest;
+import com.vaadin.flow.server.VaadinResponse;
 import com.vaadin.flow.server.VaadinService;
 import com.vaadin.flow.server.VaadinServletRequest;
 
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletException;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.util.Properties;
 
 /**
  * Created by alump on 05/07/2017.
  */
 @Route("login")
+//@RouteAlias("callback")
 public class LoginView extends VerticalLayout implements AfterNavigationObserver {
 
     private ProgressBar spinner;
     private H1 errorLabel;
     private H2 errorDescLabel;
 
+//    @Autowired
     private AuthenticationController authenticationController;
+
+
 
     public LoginView() {
         VerticalLayout layout = new VerticalLayout();
@@ -52,28 +59,54 @@ public class LoginView extends VerticalLayout implements AfterNavigationObserver
         errorDescLabel.setVisible(false);
 
         layout.add(errorLabel, errorDescLabel);
-    }
-
-    private void checkAuthentication(VaadinRequest request) {
-        VaadinServletRequest servletRequest = (VaadinServletRequest) request;
 
         try {
+            authenticationController = AuthenticationControllerProvider.getInstance();
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+    }
 
-            Tokens tokens = getAuthenticationController().handle(servletRequest.getHttpServletRequest());
-            UserInfo userInfo = Auth0Util.resolveUser(tokens.getAccessToken());
+    private void checkAuthentication(AfterNavigationEvent afterNavigationEvent, VaadinRequest request) throws IOException {
+        VaadinServletRequest servletRequest = (VaadinServletRequest) request;
 
-            Auth0Session.getCurrent().setAuth0Info(tokens, userInfo);
-            UI.getCurrent().navigate(MainView.VIEW_NAME);
+//        List<String> state = queryParameters.getParameters().get("state");
+//        List<String> code = queryParameters.getParameters().get("code");
 
-        } catch(IdentityVerificationException e) {
-            if("a0.missing_authorization_code".equals(e.getCode())) {
-                String url = getAuthenticationController().buildAuthorizeUrl(servletRequest, Auth0Util.getLoginURL()).build();
+//        VaadinSavedRequestAwareAuthenticationSuccessHandler respHandler = new VaadinSavedRequestAwareAuthenticationSuccessHandler();
+//        respHandler.onAuthenticationSuccess(
+
+//        Tokens tokens = instance.handle(request, res);
+//        servletRequest.setAttribute("state", VaadinSession.getCurrent().getState());
+//        servletRequest.getParameterMap().put("state", (String) VaadinSession.getCurrent().getState());
+//        Auth0Session current = Auth0Session.getCurrent();
+        try {
+            String url = authenticationController.buildAuthorizeUrl(servletRequest, Auth0Util.getCallback()).build();//  buildAuthorizeUrl(servletRequest, Auth0Util.getLoginURL()).build();
+            System.out.println(url);
+//                VaadinServletResponse.getCurrent().sendRedirect(url);
+            UI.getCurrent().getPage().setLocation(url);
+//            QueryParameters queryParameters = event.getLocation().getQueryParameters();
+//
+//            authenticationController.
+//
+//            servletRequest.getHttpServletRequest().setAttribute("state", queryParameters.getParameters().get("state").get(0));
+//            servletRequest.getHttpServletRequest().setAttribute("code", queryParameters.getParameters().get("code"));
+//            Tokens tokens = getAuthenticationController().handle(servletRequest);
+////            Tokens tokens = current.getAuth0Tokens().get();
+//            UserInfo userInfo = Auth0Util.resolveUser(tokens.getAccessToken());
+//            Auth0Session.getCurrent().setAuth0Info(tokens, userInfo);
+//            UI.getCurrent().navigate(MainView.VIEW_NAME);
+
+        }catch (Exception e) {
+
+            try {
+                String url = getAuthenticationController().buildAuthorizeUrl(servletRequest, Auth0Util.getLoginURL()).build();//  buildAuthorizeUrl(servletRequest, Auth0Util.getLoginURL()).build();
+                System.out.println("CATCH");
+//                VaadinServletResponse.getCurrent().sendRedirect(url);
                 UI.getCurrent().getPage().setLocation(url);
-            } else {
-                showError(e);
+            } catch (Exception eprime) {
+                showError(eprime);
             }
-        } catch(Exception e) {
-            showError(e);
         }
     }
 
@@ -87,14 +120,30 @@ public class LoginView extends VerticalLayout implements AfterNavigationObserver
 
     @Override
     public void afterNavigation(AfterNavigationEvent afterNavigationEvent) {
-        checkAuthentication(VaadinService.getCurrentRequest());
+        VaadinResponse currentResponse = VaadinService.getCurrentResponse();
+        try {
+            checkAuthentication(afterNavigationEvent, VaadinService.getCurrentRequest());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
+
+//    @Bean
+//    public AuthenticationController getAuthenticationController() throws UnsupportedEncodingException {
+//        Properties properties = Auth0Util.getAuth0Properties();
+//        JwkProvider jwkProvider = new JwkProviderBuilder( properties.getProperty("auth0.domain")).build();
+//        authenticationController = AuthenticationController.newBuilder(properties.getProperty("auth0.domain"), properties.getProperty("auth0.clientId"), properties.getProperty("auth0.clientSecret"))
+//                .withJwkProvider(jwkProvider)
+//                .build();
+//        return authenticationController;
+//    }
+
 
     protected AuthenticationController getAuthenticationController() {
         if(authenticationController == null) {
             Properties properties = Auth0Util.getAuth0Properties();
-            authenticationController = AuthenticationController.newBuilder(
-                    properties.getProperty("auth0.domain"),
+//            JwkProvider jwkProvider = new JwkProviderBuilder( properties.getProperty("auth0.domain")).build();
+            authenticationController = AuthenticationController.newBuilder(properties.getProperty("auth0.domain"),
                     properties.getProperty("auth0.clientId"),
                     properties.getProperty("auth0.clientSecret")).build();
         }

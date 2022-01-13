@@ -6,28 +6,48 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.H3;
-import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.AfterNavigationEvent;
 import com.vaadin.flow.router.AfterNavigationObserver;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.server.*;
+
+import java.io.IOException;
 
 @Route(MainView.VIEW_NAME)
-public class MainView extends VerticalLayout implements AfterNavigationObserver {
+//@RouteAlias("callback")
+public class MainView extends VerticalLayout implements AfterNavigationObserver, RequestHandler, VaadinServiceInitListener {
 
     public final static String VIEW_NAME = "main";
 
-    private final Auth0Management management;
-
-    public MainView(Auth0Management management) {
-        this.management = management;
+    public MainView() {
     }
 
     @Override
     public void afterNavigation(AfterNavigationEvent afterNavigationEvent) {
         init();
     }
+
+    @Override
+    public void serviceInit(ServiceInitEvent serviceInitEvent) {
+        System.out.println("CHECK");
+        serviceInitEvent.addIndexHtmlRequestListener(response -> {
+            // IndexHtmlRequestListener to change the bootstrap page
+            System.out.println("HERE");
+        });
+
+        serviceInitEvent.addRequestHandler((s, r1, r2) -> {
+           return false;
+        });
+    }
+
+    @Override
+    public boolean handleRequest(VaadinSession vaadinSession, VaadinRequest vaadinRequest, VaadinResponse vaadinResponse) throws IOException {
+        return false;
+    }
+
+
 
     private void init() {
         setMargin(true);
@@ -75,21 +95,6 @@ public class MainView extends VerticalLayout implements AfterNavigationObserver 
 ////                info.add(image);
 ////            });
         });
-
-        Label mgnLabel = new Label();
-        mgnLabel.setWidth("100%");
-        add(mgnLabel);
-        try {
-            if(management.isEnabled()) {
-                mgnLabel.getElement().setText("Found " + management.getUsers().size() + " users from Auth0");
-            } else {
-                mgnLabel.getElement().setText("Management API key not defined");
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-            mgnLabel.getElement().setText("Failed to access management API");
-            //mgnLabel.addStyleName(ValoTheme.LABEL_FAILURE);
-        }
 
     }
 

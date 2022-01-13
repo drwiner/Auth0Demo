@@ -7,6 +7,7 @@ import org.springframework.boot.web.servlet.ServletRegistrationBean;
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
+import org.vaadin.alump.auth0servlet.Auth0Filter;
 
 @SpringBootApplication
 public class Auth0DemoApplication extends SpringBootServletInitializer {

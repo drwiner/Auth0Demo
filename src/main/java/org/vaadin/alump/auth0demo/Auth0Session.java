@@ -7,6 +7,8 @@ import com.vaadin.flow.server.VaadinService;
 import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.spring.SpringVaadinSession;
 
+import javax.servlet.http.HttpServletRequest;
+import java.util.Collection;
 import java.util.Optional;
 
 public class Auth0Session extends SpringVaadinSession {
@@ -64,7 +66,15 @@ public class Auth0Session extends SpringVaadinSession {
     }
 
     public Optional<Auth0User> getUser() {
-        return getAuth0UserInfo().map(i -> new Auth0User(i));
+        return getAuth0UserInfo().map(Auth0User::new);
+    }
+
+    public static Auth0Session getSessionFromRequest(HttpServletRequest request){
+        Collection<VaadinSession> allSessions = Auth0Session.getAllSessions(request.getSession());
+        if (allSessions.isEmpty())
+            return null;
+
+        return (Auth0Session) allSessions.iterator().next();
     }
 
 }
