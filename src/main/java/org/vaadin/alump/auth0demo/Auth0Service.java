@@ -27,10 +27,13 @@ public class Auth0Service extends SpringVaadinServletService {
     }
 
     private static void sessionInit(SessionInitEvent event) {
-//            VaadinRequest request = event.getRequest();
         event.getSession().addRequestHandler(Auth0Service::handleRequest);
 
     }
+
+    private static final String AUTH0_CALLBACK_HANDLE = "/callback";
+    private static final String STATE = "state";
+    private static final String CODE = "code";
 
     private static boolean handleRequest(VaadinSession vaadinSession, VaadinRequest request, VaadinResponse response) throws IOException {
         if (request.getPathInfo().equals(AUTH0_CALLBACK_HANDLE)) {
@@ -62,34 +65,6 @@ public class Auth0Service extends SpringVaadinServletService {
         addSessionInitListener(Auth0Service::sessionInit);
         return list;
     }
-
-    private static final String AUTH0_CALLBACK_HANDLE = "/callback";
-    private static final String STATE = "state";
-    private static final String CODE = "code";
-
-
-    private void test(){
-
-//        if (request.getPathInfo().equals(AUTH0_CALLBACK_HANDLE)){
-//            if (request.getParameterMap().containsKey(STATE) && request.getParameterMap().containsKey(CODE)){
-//                try {
-//                    Tokens tokens = AuthenticationControllerProvider.getInstance().handle(request);
-//                    UserInfo userInfo = Auth0Util.resolveUser(tokens.getAccessToken());
-//                    Auth0Session session = Auth0Session.getSessionFromRequest(request);
-//                    if (session == null){
-//                        System.err.println("session error");
-//                    }
-////                    Auth0Session session = (Auth0Session) this.createVaadinRequest(request).getSession();
-//                    session.setAuth0Info(tokens, userInfo);
-//                    UI.getCurrent().navigate("main");
-//                    return;
-//                } catch (Exception eprime) {
-//                    System.err.println("IDk what to do here");
-//                }
-//            }
-//        }
-    }
-
 
     @Override
     protected VaadinSession createVaadinSession(VaadinRequest request) {
