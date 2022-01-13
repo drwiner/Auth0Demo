@@ -13,6 +13,7 @@ import org.springframework.context.ApplicationContext;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.util.List;
 
 /**
@@ -25,38 +26,40 @@ public class Auth0Service extends SpringVaadinServletService {
         super(servlet, deploymentConfiguration, context);
     }
 
+    private static void sessionInit(SessionInitEvent event) {
+//            VaadinRequest request = event.getRequest();
+        event.getSession().addRequestHandler(Auth0Service::handleRequest);
+
+    }
+
+    private static boolean handleRequest(VaadinSession vaadinSession, VaadinRequest request, VaadinResponse response) throws IOException {
+        if (request.getPathInfo().equals(AUTH0_CALLBACK_HANDLE)) {
+            if (request.getParameterMap().containsKey(STATE) && request.getParameterMap().containsKey(CODE)) {
+                try {
+                    Tokens tokens = AuthenticationControllerProvider.getInstance().handle((HttpServletRequest) request);
+                    UserInfo userInfo = Auth0Util.resolveUser(tokens.getAccessToken());
+                    Auth0Session session = (Auth0Session) vaadinSession;
+                    if (session == null) {
+                        System.err.println("session error");
+                    } else {
+                        session.setAuth0Info(tokens, userInfo);
+                    }
+                    ((HttpServletResponse) response).sendRedirect("main");
+                    return true;
+                } catch (Exception eprime) {
+                    ((HttpServletResponse) response).sendRedirect("error");
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
     @Override
     protected List<RequestHandler> createRequestHandlers()
             throws ServiceException {
         List<RequestHandler> list = super.createRequestHandlers();
-        addSessionInitListener(event -> {
-//            VaadinRequest request = event.getRequest();
-            event.getSession().addRequestHandler((vaadinSession, request, response) -> {
-//                event.getRequest()
-                if (request.getPathInfo().equals(AUTH0_CALLBACK_HANDLE)){
-                    if (request.getParameterMap().containsKey(STATE) && request.getParameterMap().containsKey(CODE)){
-                        try {
-                            Tokens tokens = AuthenticationControllerProvider.getInstance().handle((HttpServletRequest) request);
-                            UserInfo userInfo = Auth0Util.resolveUser(tokens.getAccessToken());
-                            Auth0Session session = (Auth0Session) vaadinSession;
-                            if (session == null){
-                                System.err.println("session error");
-                            } else {
-                                session.setAuth0Info(tokens, userInfo);
-                            }
-                            ((HttpServletResponse) response).sendRedirect("main");
-
-//                            UI.getCurrent().navigate("main");
-                            return true;
-                        } catch (Exception eprime) {
-                            System.err.println("IDk what to do here");
-                        }
-                    }
-                }
-                return false;
-            });
-
-        });
+        addSessionInitListener(Auth0Service::sessionInit);
         return list;
     }
 

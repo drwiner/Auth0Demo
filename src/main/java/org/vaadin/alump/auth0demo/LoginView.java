@@ -25,7 +25,6 @@ import java.util.Properties;
  * Created by alump on 05/07/2017.
  */
 @Route("login")
-//@RouteAlias("callback")
 public class LoginView extends VerticalLayout implements AfterNavigationObserver {
 
     private ProgressBar spinner;
@@ -60,18 +59,10 @@ public class LoginView extends VerticalLayout implements AfterNavigationObserver
         VaadinServletRequest servletRequest = (VaadinServletRequest) request;
         try {
             String url = AuthenticationControllerProvider.getInstance().buildAuthorizeUrl(servletRequest, Auth0Util.getCallback()).withScope("openid email profile").build();//  buildAuthorizeUrl(servletRequest, Auth0Util.getLoginURL()).build();
-            System.out.println(url);
             UI.getCurrent().getPage().setLocation(url);
 
         }catch (Exception e) {
-
-            try {
-                String url = AuthenticationControllerProvider.getInstance().buildAuthorizeUrl(servletRequest, Auth0Util.getLoginURL()).build();//  buildAuthorizeUrl(servletRequest, Auth0Util.getLoginURL()).build();
-                System.out.println("CATCH");
-                UI.getCurrent().getPage().setLocation(url);
-            } catch (Exception eprime) {
-                showError(eprime);
-            }
+            showError(e);
         }
     }
 

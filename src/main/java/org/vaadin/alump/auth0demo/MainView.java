@@ -18,7 +18,7 @@ import java.io.IOException;
 
 @Route(MainView.VIEW_NAME)
 @RouteAlias("")
-public class MainView extends VerticalLayout implements AfterNavigationObserver, RequestHandler, VaadinServiceInitListener {
+public class MainView extends VerticalLayout implements AfterNavigationObserver {
 
     public final static String VIEW_NAME = "main";
 
@@ -29,25 +29,6 @@ public class MainView extends VerticalLayout implements AfterNavigationObserver,
     public void afterNavigation(AfterNavigationEvent afterNavigationEvent) {
         init();
     }
-
-    @Override
-    public void serviceInit(ServiceInitEvent serviceInitEvent) {
-        System.out.println("CHECK");
-        serviceInitEvent.addIndexHtmlRequestListener(response -> {
-            // IndexHtmlRequestListener to change the bootstrap page
-            System.out.println("HERE");
-        });
-
-        serviceInitEvent.addRequestHandler((s, r1, r2) -> {
-           return false;
-        });
-    }
-
-    @Override
-    public boolean handleRequest(VaadinSession vaadinSession, VaadinRequest vaadinRequest, VaadinResponse vaadinResponse) throws IOException {
-        return false;
-    }
-
 
 
     private void init() {

@@ -24,7 +24,6 @@ public class Auth0Servlet extends SpringServlet {
 
 
     public Auth0Servlet(ApplicationContext context) {
-//        super();
         super(context, false);
         this.context = context;
     }
@@ -39,17 +38,4 @@ public class Auth0Servlet extends SpringServlet {
         return service;
     }
 
-    private static final String AUTH0_CALLBACK_HANDLE = "/callback";
-    private static final String STATE = "state";
-    private static final String CODE = "code";
-
-//    @Override
-//    protected void service(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-//        /*
-//         * If this is an Auth0 authorize request, then we should see a state and code
-//         */
-//        super.service(request, response);
-//
-//
-//    }
 }
