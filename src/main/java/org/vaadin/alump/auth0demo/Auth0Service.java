@@ -35,6 +35,10 @@ public class Auth0Service extends SpringVaadinServletService {
     private static final String STATE = "state";
     private static final String CODE = "code";
 
+    /*
+     * This is what is added by @drwiner 01-2022
+     */
+
     private static boolean handleRequest(VaadinSession vaadinSession, VaadinRequest request, VaadinResponse response) throws IOException {
         if (request.getPathInfo().equals(AUTH0_CALLBACK_HANDLE)) {
             if (request.getParameterMap().containsKey(STATE) && request.getParameterMap().containsKey(CODE)) {
