@@ -32,11 +32,6 @@ public class LoginView extends VerticalLayout implements AfterNavigationObserver
     private H1 errorLabel;
     private H2 errorDescLabel;
 
-//    @Autowired
-    private AuthenticationController authenticationController;
-
-
-
     public LoginView() {
         VerticalLayout layout = new VerticalLayout();
         //layout.addClassName("wait-for-login");
@@ -59,12 +54,6 @@ public class LoginView extends VerticalLayout implements AfterNavigationObserver
         errorDescLabel.setVisible(false);
 
         layout.add(errorLabel, errorDescLabel);
-
-        try {
-            authenticationController = AuthenticationControllerProvider.getInstance();
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        }
     }
 
     private void checkAuthentication(AfterNavigationEvent afterNavigationEvent, VaadinRequest request) throws IOException {
@@ -81,7 +70,7 @@ public class LoginView extends VerticalLayout implements AfterNavigationObserver
 //        servletRequest.getParameterMap().put("state", (String) VaadinSession.getCurrent().getState());
 //        Auth0Session current = Auth0Session.getCurrent();
         try {
-            String url = authenticationController.buildAuthorizeUrl(servletRequest, Auth0Util.getCallback()).build();//  buildAuthorizeUrl(servletRequest, Auth0Util.getLoginURL()).build();
+            String url = AuthenticationControllerProvider.getInstance().buildAuthorizeUrl(servletRequest, Auth0Util.getCallback()).withScope("openid email profile").build();//  buildAuthorizeUrl(servletRequest, Auth0Util.getLoginURL()).build();
             System.out.println(url);
 //                VaadinServletResponse.getCurrent().sendRedirect(url);
             UI.getCurrent().getPage().setLocation(url);
@@ -100,7 +89,7 @@ public class LoginView extends VerticalLayout implements AfterNavigationObserver
         }catch (Exception e) {
 
             try {
-                String url = getAuthenticationController().buildAuthorizeUrl(servletRequest, Auth0Util.getLoginURL()).build();//  buildAuthorizeUrl(servletRequest, Auth0Util.getLoginURL()).build();
+                String url = AuthenticationControllerProvider.getInstance().buildAuthorizeUrl(servletRequest, Auth0Util.getLoginURL()).build();//  buildAuthorizeUrl(servletRequest, Auth0Util.getLoginURL()).build();
                 System.out.println("CATCH");
 //                VaadinServletResponse.getCurrent().sendRedirect(url);
                 UI.getCurrent().getPage().setLocation(url);
@@ -128,26 +117,4 @@ public class LoginView extends VerticalLayout implements AfterNavigationObserver
         }
     }
 
-//    @Bean
-//    public AuthenticationController getAuthenticationController() throws UnsupportedEncodingException {
-//        Properties properties = Auth0Util.getAuth0Properties();
-//        JwkProvider jwkProvider = new JwkProviderBuilder( properties.getProperty("auth0.domain")).build();
-//        authenticationController = AuthenticationController.newBuilder(properties.getProperty("auth0.domain"), properties.getProperty("auth0.clientId"), properties.getProperty("auth0.clientSecret"))
-//                .withJwkProvider(jwkProvider)
-//                .build();
-//        return authenticationController;
-//    }
-
-
-    protected AuthenticationController getAuthenticationController() {
-        if(authenticationController == null) {
-            Properties properties = Auth0Util.getAuth0Properties();
-//            JwkProvider jwkProvider = new JwkProviderBuilder( properties.getProperty("auth0.domain")).build();
-            authenticationController = AuthenticationController.newBuilder(properties.getProperty("auth0.domain"),
-                    properties.getProperty("auth0.clientId"),
-                    properties.getProperty("auth0.clientSecret")).build();
-        }
-
-        return authenticationController;
-    }
 }
