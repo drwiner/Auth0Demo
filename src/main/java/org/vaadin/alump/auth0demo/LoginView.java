@@ -56,42 +56,18 @@ public class LoginView extends VerticalLayout implements AfterNavigationObserver
         layout.add(errorLabel, errorDescLabel);
     }
 
-    private void checkAuthentication(AfterNavigationEvent afterNavigationEvent, VaadinRequest request) throws IOException {
+    private void checkAuthentication(VaadinRequest request) {
         VaadinServletRequest servletRequest = (VaadinServletRequest) request;
-
-//        List<String> state = queryParameters.getParameters().get("state");
-//        List<String> code = queryParameters.getParameters().get("code");
-
-//        VaadinSavedRequestAwareAuthenticationSuccessHandler respHandler = new VaadinSavedRequestAwareAuthenticationSuccessHandler();
-//        respHandler.onAuthenticationSuccess(
-
-//        Tokens tokens = instance.handle(request, res);
-//        servletRequest.setAttribute("state", VaadinSession.getCurrent().getState());
-//        servletRequest.getParameterMap().put("state", (String) VaadinSession.getCurrent().getState());
-//        Auth0Session current = Auth0Session.getCurrent();
         try {
             String url = AuthenticationControllerProvider.getInstance().buildAuthorizeUrl(servletRequest, Auth0Util.getCallback()).withScope("openid email profile").build();//  buildAuthorizeUrl(servletRequest, Auth0Util.getLoginURL()).build();
             System.out.println(url);
-//                VaadinServletResponse.getCurrent().sendRedirect(url);
             UI.getCurrent().getPage().setLocation(url);
-//            QueryParameters queryParameters = event.getLocation().getQueryParameters();
-//
-//            authenticationController.
-//
-//            servletRequest.getHttpServletRequest().setAttribute("state", queryParameters.getParameters().get("state").get(0));
-//            servletRequest.getHttpServletRequest().setAttribute("code", queryParameters.getParameters().get("code"));
-//            Tokens tokens = getAuthenticationController().handle(servletRequest);
-////            Tokens tokens = current.getAuth0Tokens().get();
-//            UserInfo userInfo = Auth0Util.resolveUser(tokens.getAccessToken());
-//            Auth0Session.getCurrent().setAuth0Info(tokens, userInfo);
-//            UI.getCurrent().navigate(MainView.VIEW_NAME);
 
         }catch (Exception e) {
 
             try {
                 String url = AuthenticationControllerProvider.getInstance().buildAuthorizeUrl(servletRequest, Auth0Util.getLoginURL()).build();//  buildAuthorizeUrl(servletRequest, Auth0Util.getLoginURL()).build();
                 System.out.println("CATCH");
-//                VaadinServletResponse.getCurrent().sendRedirect(url);
                 UI.getCurrent().getPage().setLocation(url);
             } catch (Exception eprime) {
                 showError(eprime);
@@ -109,12 +85,7 @@ public class LoginView extends VerticalLayout implements AfterNavigationObserver
 
     @Override
     public void afterNavigation(AfterNavigationEvent afterNavigationEvent) {
-        VaadinResponse currentResponse = VaadinService.getCurrentResponse();
-        try {
-            checkAuthentication(afterNavigationEvent, VaadinService.getCurrentRequest());
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        checkAuthentication(VaadinService.getCurrentRequest());
     }
 
 }
